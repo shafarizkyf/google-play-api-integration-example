@@ -1,0 +1,5 @@
+node_modules/
+.env
+*.json
+!package.json
+playground-455201-8a4c43a719e6.json

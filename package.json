@@ -1,0 +1,14 @@
+{
+  "name": "google-play-api-integration-example",
+  "version": "1.0.0",
+  "description": "Google Play API integration for reviews",
+  "main": "google-play-reviews.js",
+  "scripts": {
+    "test": "node example.js"
+  },
+  "dependencies": {
+    "@googleapis/androidpublisher": "^9.0.0",
+    "dotenv": "^16.0.0",
+    "google-auth-library": "^9.0.0"
+  }
+}
