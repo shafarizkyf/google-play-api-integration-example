@@ -97,8 +97,89 @@ Reply to an existing review.
 await postReviewReply('com.example.app', 'review-id-123', 'Thanks!');
 ```
 
+---
+
+# Apple App Store API Integration
+
+This project also provides functions to get reviews and post replies from the Apple App Store.
+
+## Setup
+
+### Prerequisites
+
+1. Apple Developer Program membership
+2. App Store Connect account
+
+### Step 1: Create API Key
+
+1. Go to [App Store Connect](https://appstoreconnect.apple.com/)
+2. Go to **Users and Access** > **Keys**
+3. Click **+** to create a new key
+4. Fill in the details:
+   - Name: `app-store-review-bot`
+   - Access: **App Manager** (or **Developer** with review access)
+5. Download the private key (`.p8` file) - **only available once!**
+6. Note your:
+   - **Key ID** (shown after creation)
+   - **Issuer ID** (shown at top of the page)
+
+### Step 2: Get Bundle ID
+
+Your bundle ID is in Xcode (e.g., `com.example.myapp`) or in App Store Connect under your app's information.
+
+### Step 3: Configure Environment
+
+Add to your `.env` file:
+
+```env
+# Apple App Store
+APPLE_KEY_ID=YourKeyID
+APPLE_ISSUER_ID=YourIssuerID
+APPLE_PRIVATE_KEYPath=./AuthKey_YourKeyID.p8
+APPLE_BUNDLE_ID=com.example.myapp
+```
+
+## Usage
+
+```javascript
+const { getReviews, postReviewReply } = require('./app-store-reviews');
+
+async function main() {
+  const BUNDLE_ID = process.env.APPLE_BUNDLE_ID;
+
+  // Get reviews
+  const result = await getReviews(BUNDLE_ID);
+  console.log(result.reviews);
+
+  // Reply to a review
+  await postReviewReply(BUNDLE_ID, 'review-id-123', 'Thank you for your feedback!');
+}
+
+main().catch(console.error);
+```
+
+## API Reference
+
+### getReviews(bundleId)
+
+Returns reviews for the app.
+
+```javascript
+const { reviews, cursor } = await getReviews('com.example.app');
+```
+
+### postReviewReply(bundleId, reviewId, text)
+
+Reply to an existing review.
+
+```javascript
+await postReviewReply('com.example.app', 'review-id-123', 'Thanks!');
+```
+
+---
+
 ## Security Notes
 
-- Never commit your service account JSON file to version control
-- Add `service-account.json` and `.env` to `.gitignore`
+- Never commit your private key to version control
+- Add `*.p8` and `.env` to `.gitignore`
 - Rotate keys periodically
