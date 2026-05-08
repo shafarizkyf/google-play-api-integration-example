@@ -1,0 +1,34 @@
+{
+    "reviews": [
+        {
+            "reviewId": "24e5dff7-8e09-45b6-86af-1a8b87a3964a",
+            "authorName": "Kritik Sistem",
+            "comments": [
+                {
+                    "userComment": {
+                        "text": "\ttest review",
+                        "lastModified": {
+                            "seconds": "1778215777",
+                            "nanos": 403000000
+                        },
+                        "starRating": 5,
+                        "reviewerLanguage": "en",
+                        "device": "begonia",
+                        "androidOsVersion": 29,
+                        "deviceMetadata": {
+                            "productName": "begonia (Redmi Note 8 Pro)",
+                            "manufacturer": "Redmi",
+                            "deviceClass": "FORM_FACTOR_PHONE",
+                            "screenWidthPx": 1080,
+                            "screenHeightPx": 2340,
+                            "nativePlatform": "ABI_ARM64_V8,ABI_ARM_V7,ABI_ARM",
+                            "screenDensityDpi": 440,
+                            "glEsVersion": 196610,
+                            "ramMb": 5635
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}
