@@ -14,7 +14,7 @@ async function main() {
     const r = review;
     console.log(`Review ID: ${r.reviewId}`);
     console.log(`  Author: ${r.authorName}`);
-    console.log(`  Rating: ${r.stars} stars`);
+    console.log(`  Rating: ${r.comments?.[0]?.userComment?.starRating} stars`);
     console.log(`  Comment: ${r.comments?.[0]?.userComment?.text || 'N/A'}`);
     console.log(`  Device: ${r.comments?.[0]?.userComment?.deviceMetadata?.productName || 'N/A'}`);
     console.log('');
