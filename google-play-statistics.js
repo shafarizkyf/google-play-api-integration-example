@@ -1,49 +1,77 @@
 require('dotenv').config();
 const { Storage } = require('@google-cloud/storage');
 const fs = require('fs');
+const path = require('path');
 
 const credentialsPath = process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_PATH;
 const BUCKET_NAME = process.env.GOOGLE_PLAY_BUCKET_NAME;
-const PREFIX = (process.env.GOOGLE_PLAY_STAT_PREFIX || 'stats/installs') + '/';
 
-async function downloadLatestReport() {
-    console.log('Config:', { BUCKET_NAME, PREFIX, credentialsPath });
+const STAT_TYPES = {
+    installs: 'stats/installs',
+    ratings: 'stats/ratings',
+    store_performance: 'stats/store_performance'
+};
 
-    if (!BUCKET_NAME) {
-        console.error('GOOGLE_PLAY_BUCKET_NAME is not set');
+async function downloadReport(prefix) {
+    const storage = new Storage({ keyFilename: credentialsPath });
+
+    const [files] = await storage.bucket(BUCKET_NAME).getFiles({ prefix: prefix + '/' });
+
+    if (files.length === 0) {
+        console.log(`No files found for ${prefix}`);
+        return null;
+    }
+
+    files.sort((a, b) => a.name.localeCompare(b.name));
+    const latestFile = files[files.length - 1];
+
+    console.log(`Found: ${latestFile.name}`);
+
+    const isGzipped = latestFile.name.endsWith('.gz');
+    const baseName = path.basename(latestFile.name, isGzipped ? '.gz' : '');
+    const destination = `./${baseName}${isGzipped ? '.gz' : ''}`;
+
+    await latestFile.download({ destination });
+    console.log(`Saved: ${destination}`);
+
+    return destination;
+}
+
+async function downloadAllReports() {
+    console.log('Config:', { BUCKET_NAME, credentialsPath });
+    console.log('Downloading all reports...\n');
+
+    const results = {};
+
+    for (const [type, prefix] of Object.entries(STAT_TYPES)) {
+        console.log(`\n=== ${type.toUpperCase()} ===`);
+        try {
+            const filePath = await downloadReport(prefix);
+            results[type] = filePath;
+        } catch (error) {
+            console.error(`Error downloading ${type}:`, error.message);
+            results[type] = null;
+        }
+    }
+
+    console.log('\n=== SUMMARY ===');
+    for (const [type, filePath] of Object.entries(results)) {
+        console.log(`${type}: ${filePath || 'FAILED'}`);
+    }
+
+    return results;
+}
+
+async function downloadLatestReport(type = 'installs') {
+    console.log(`Downloading latest ${type} report...\n`);
+
+    const prefix = STAT_TYPES[type];
+    if (!prefix) {
+        console.error(`Invalid type: ${type}. Valid types: ${Object.keys(STAT_TYPES).join(', ')}`);
         return;
     }
 
-    const storage = new Storage({ keyFilename: credentialsPath });
-
-    try {
-        const bucket = storage.bucket(BUCKET_NAME);
-        const [files] = await bucket.getFiles({ prefix: PREFIX });
-
-        if (files.length === 0) {
-            console.log('No files found in the specified path.');
-            return;
-        }
-
-        files.sort((a, b) => a.name.localeCompare(b.name));
-        const latestFile = files[files.length - 1];
-
-        console.log(`Found latest report: ${latestFile.name}`);
-
-        const isGzipped = latestFile.name.endsWith('.gz');
-        const destination = isGzipped ? './latest_installs.csv.gz' : './latest_installs.csv';
-        await latestFile.download({ destination });
-
-        console.log(`Successfully downloaded to ${destination}`);
-
-        if (isGzipped) {
-            console.log('File is gzipped. Use: gunzip latest_installs.csv.gz to extract');
-        }
-        return destination;
-    } catch (error) {
-        console.error('Error accessing GCS:', error.message);
-    }
+    return downloadReport(prefix);
 }
 
-
-module.exports = { downloadLatestReport };
+module.exports = { downloadLatestReport, downloadAllReports, STAT_TYPES };

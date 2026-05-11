@@ -120,7 +120,7 @@ const stats = await getStats('com.example.app');
 
 ## Google Play Statistics (GCS)
 
-Download daily install reports from Google Cloud Storage.
+Download daily reports from Google Cloud Storage.
 
 ### Setup
 
@@ -132,18 +132,29 @@ Add to `.env`:
 
 ```env
 GOOGLE_PLAY_BUCKET_NAME=pubsite_prod_6229801975270715472
-GOOGLE_PLAY_STAT_PREFIX=stats/installs
 ```
+
+### Available Reports
+
+| Type | Description | File |
+|------|-------------|------|
+| installs | Daily install/uninstall counts | `installs_*.csv` |
+| ratings | User ratings breakdown | `ratings_*.csv` |
+| store_performance | Traffic sources, installs, conversions | `total_store_performance_*.csv` |
 
 ### Usage
 
 ```javascript
-const { downloadLatestReport } = require('./google-play-statistics');
+const { downloadLatestReport, downloadAllReports } = require('./google-play-statistics');
 
 async function main() {
-  const filePath = await downloadLatestReport();
-  console.log(`Downloaded: ${filePath}`);
-  // File is gzipped - use: gunzip file.csv.gz to extract
+  // Download all 3 report types
+  const results = await downloadAllReports();
+
+  // Or download specific type
+  const filePath = await downloadLatestReport('installs');
+  const ratingsPath = await downloadLatestReport('ratings');
+  const storePath = await downloadLatestReport('store_performance');
 }
 
 main().catch(console.error);
@@ -152,7 +163,13 @@ main().catch(console.error);
 ### Run
 
 ```bash
-node -e "require('./google-play-statistics').downloadLatestReport()"
+# Download all reports
+node -e "require('./google-play-statistics').downloadAllReports()"
+
+# Download specific type
+node -e "require('./google-play-statistics').downloadLatestReport('installs')"
+node -e "require('./google-play-statistics').downloadLatestReport('ratings')"
+node -e "require('./google-play-statistics').downloadLatestReport('store_performance')"
 ```
 
 ---
