@@ -79,6 +79,16 @@ main().catch(console.error);
 npm run test
 ```
 
+### Run All Features
+
+```bash
+# Download latest install statistics
+node -e "require('./google-play-statistics').downloadLatestReport()"
+
+# Get reviews and reply
+npm run test
+```
+
 ## API Reference
 
 ### getReviews(packageName, pageToken?)
@@ -95,6 +105,54 @@ Reply to an existing review.
 
 ```javascript
 await postReviewReply('com.example.app', 'review-id-123', 'Thanks!');
+```
+
+### getStats(packageName)
+
+Returns install statistics (requires "View app information" permission in Play Console).
+
+```javascript
+const stats = await getStats('com.example.app');
+// { dailyInstalls: [...], totalInstalls: 1000 }
+```
+
+---
+
+## Google Play Statistics (GCS)
+
+Download daily install reports from Google Cloud Storage.
+
+### Setup
+
+1. Ensure your service account has access to the GCS bucket
+2. Get your bucket name from Play Console: **Downloads** > **Statistics exports**
+3. Bucket name format: `pubsite_prod_{DEVELOPER_ID}`
+
+Add to `.env`:
+
+```env
+GOOGLE_PLAY_BUCKET_NAME=pubsite_prod_6229801975270715472
+GOOGLE_PLAY_STAT_PREFIX=stats/installs
+```
+
+### Usage
+
+```javascript
+const { downloadLatestReport } = require('./google-play-statistics');
+
+async function main() {
+  const filePath = await downloadLatestReport();
+  console.log(`Downloaded: ${filePath}`);
+  // File is gzipped - use: gunzip file.csv.gz to extract
+}
+
+main().catch(console.error);
+```
+
+### Run
+
+```bash
+node -e "require('./google-play-statistics').downloadLatestReport()"
 ```
 
 ---
